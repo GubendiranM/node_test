@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EMDSystems - Timesheet | Phase page</title>
+    <link rel="stylesheet" type="text/css" href="/css_style/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="/script/validation.js"> </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        var phaseName;
+        var phaseDesc;
+        var nameFlag = false;
+        var descFlag = false;
+        function checkPhaseName(name){
+
+           if( !validateName(name.value) ){
+               alert('phase name must be letter except space ..!');
+
+               nameFlag = false;
+               name.focus();
+           }else if( ! validateValueLength(name.value, 60)){
+               alert('phase name Maximum 60 character only ..!');
+               nameFlag = false;
+               name.focus();
+           }else{
+               phaseName = name;
+               nameFlag = true;
+           }
+        }
+        function checkDescription(desc){
+
+             if( ! validateValueLength(desc.value, 255)){
+                alert('Description Maximum 255 character only ..!');
+                 descFlag = false;
+                 desc.focus();
+            }else{
+                 phaseDesc = desc;
+                 descFlag = true;
+             }
+        }
+
+        function insertPhase(button){
+            button.disabled = true;
+            if(!nameFlag){
+                alert('Phase Name Validation Failed ..!');
+                phaseName.focus();
+            }else if(!descFlag){
+                alert('Description Validation Failed ..!');
+                phaseDesc.focus();
+            }else{
+                // var phaseJson = JSON().parse(new Phase(null, phaseName.value, phaseDesc.value));
+                var phaseJson = new Phase(null, phaseName.value, phaseDesc.value);
+                $.ajax({
+                    type: 'GET',
+                    url: '/phase/add',
+                    data: phaseJson,
+                    dataType: 'json',
+                    complete: function(data) {
+                        button.disabled = false;
+
+                    },
+                    error: function(err) {
+                        //alert('err: data lost ..!')
+                        button.disabled = false;
+                        console.log('err : '+ JSON.stringify(err));
+                        document.getElementById('msg').innerHTML = 'Server Err ..!';
+                    },
+                    timeout: 3000,
+                    success: function(result) {
+
+                        if(result.error){
+                            document.getElementById('msg').innerHTML = result.msg;
+
+                        }else{
+                            document.getElementById('msg').innerHTML = result.msg;
+                        }
+                        console.log('Success : '+ JSON.stringify(result));
+                        //createPhaseList(phaseList);
+                        button.disabled = false;
+                    }
+
+                });
+
+            }
+        }
+
+
+        function getPhaselist(){
+            $.ajax({
+                type: 'GET',
+                url: '/phase/view/all',
+                complete: function(data) {
+                   // button.disabled = false;
+
+                },
+                error: function(err) {
+                    console.log('err : '+ JSON.stringify(err));
+                    document.getElementById('msg').innerHTML = 'Server Err ..!';
+                },
+                timeout: 3000,
+                success: function(result) {
+
+                    if(result.error){
+                        document.getElementById('msg').innerHTML = result.msg;
+
+                    }else{
+                        document.getElementById('msg').innerHTML = result.msg;
+                    }
+                    console.log('Success : '+ JSON.stringify(result));
+                    createPhaseList(result.data);
+
+                }
+
+            });
+        }
+
+        function deletePhase(id){
+            var phaseJson = new Phase(id, null, null);
+            $.ajax({
+                type: 'GET',
+                url: '/phase/delete',
+                data: phaseJson,
+                dataType: 'json',
+                complete: function(data) {
+                    // todo any notification
+                },
+                error: function(err) {
+                    console.log('err : '+ JSON.stringify(err));
+                    document.getElementById('msg').innerHTML = 'Server Err ..!';
+                },
+                timeout: 3000,
+                success: function(result) {
+
+                    if(result.error){
+                        document.getElementById('msg').innerHTML = result.msg;
+
+                    }else{
+                        document.getElementById('msg').innerHTML = result.msg;
+                    }
+                    console.log('Success : '+ JSON.stringify(result));
+                    getPhaselist();
+                }
+
+            });
+        }
+
+        function updatePhase(id){
+            var _name = $('#nameUpt_'+id).val();
+            var _description = $('#descUpt_'+id).val();
+            if( !validateName(_name) ){
+                alert('phase name must be letter except space ..!');
+                $('#nameUpt_'+id).focus();
+            }else if( ! validateValueLength(_name, 60)){
+                alert('phase name Maximum 60 character only ..!');
+                $('#nameUpt_'+id).focus();
+            }else if(! validateValueLength(_description, 255)){
+                alert('Description Maximum 255 character only ..!');
+                $('#descUpt_'+id).focus();
+            }else{
+                var phaseJson = new Phase(id, _name, _description);
+                $.ajax({
+                    type: 'GET',
+                    url: '/phase/update',
+                    data: phaseJson,
+                    dataType: 'json',
+                    complete: function(data) {
+                      // todo any notification
+                    },
+                    error: function(err) {
+                        console.log('err : '+ JSON.stringify(err));
+                        document.getElementById('msg').innerHTML = 'Server Err ..!';
+                    },
+                    timeout: 3000,
+                    success: function(result) {
+
+                        if(result.error){
+                            document.getElementById('msg').innerHTML = result.msg;
+
+                        }else{
+                            document.getElementById('msg').innerHTML = result.msg;
+                        }
+                        console.log('Success : '+ JSON.stringify(result));
+                        setUpdatedData(phaseJson);
+                    }
+
+                });
+            }
+        }
+
+        function setUpdatedData(phase){
+            var _delBtn = $('<button/>', { id: phase.id, text: 'delete', onclick: 'userOption(this.id, "delete")', class: 'list_option_btn' }); // delete phase button from phase list...
+            var _updateBtn = $('<button/>', { id: phase.id, text: 'update', onclick: 'userOption(this.id, "update")', class: 'list_option_btn' }); // delete phase button from phase list...
+            $('#option_'+phase.id).empty();
+            $('#option_'+phase.id).append('&nbsp;',_delBtn,'&nbsp;',_updateBtn);
+            $('#name_'+phase.id).empty();
+            $('#desc_'+phase.id).empty();
+            $('#name_'+phase.id).append(phase.name);
+            $('#desc_'+phase.id).append(phase.description);
+
+        }
+
+
+        function userOption(id, val){
+            //alert(val + "id "+id);
+            if(val == 'delete'){
+                deletePhase(id);
+            }
+            if(val == 'update'){
+                $('#option_'+id).empty();
+                var name = $('#name_'+id).text();
+                var desc = $('#desc_'+id).text();
+                $('#name_'+id).empty();
+                $('#desc_'+id).empty();
+                var _save = $('<button/>',{id: 'save_'+id, name: id, text: 'save', onclick: 'updatePhase(this.name)',class: 'list_option_btn'});
+                var _nameInput = $('<input/>',{id: 'nameUpt_'+id, value: name, onchange: 'checkPhaseName(this)', style: 'width:100%'});
+                var _descInput = $('<input/>',{id: 'descUpt_'+id, value: desc, onchange: 'checkDescription(this)', style: 'width:100%'});
+                $('#name_'+id).append(_nameInput);
+                $('#desc_'+id).append(_descInput);
+                $('#option_'+id).append('&nbsp;&nbsp;&nbsp;',_save);
+            }
+
+        }
+
+        function closePhaseList(){
+            $("#phases").empty();
+            var _viewAll = $('<button/>',{id: 'view_all', text: 'View All', onclick: 'getPhaselist()', class: 'list_btn'});
+            $("#phases").append(_viewAll);
+        }
+
+        function createPhaseList(phaseList){
+           //var _parent = document.getElementById('phases');
+            $('#phases').empty();
+            var _div = $('<div/>', { id: 'phase_header'}); // phase list div...
+            var tbl = $('<table/>',{class: 'list_view_tbl',style:'border-spacing:0px'}) ;
+            var tblth = $('<tr/>') ;
+            tblth.append($('<th/>',{text: 'Operation', style: 'text-align:left; width:20%; height: 40px;'}),$('<th/>',{text: 'Id', style: 'text-align:left; width:5%'}), $('<th/>',{text: 'Phase Name', style: 'text-align:left; width:25%'}), $('<th/>',{text: 'Description', style: 'text-align:left; width:50%'}) );// table headers   operation , id, phase name, Description
+            tbl.append(tblth);
+            $("#phases").append(_div);
+            var flag = false;
+            for(var i =0; i<phaseList.length;i++){
+                flag = true;
+                var _delBtn = $('<button/>', { id: phaseList[i].id, text: 'delete', onclick: 'userOption(this.id, "delete")', class: 'list_option_btn' }); // delete phase button from phase list...
+                var _updateBtn = $('<button/>', { id: phaseList[i].id, text: 'update', onclick: 'userOption(this.id, "update")', class: 'list_option_btn' }); // update phase button from phase list...
+                var _optd = $('<td/>',{id: 'option_'+phaseList[i].id});
+                _optd.append('&nbsp;',_delBtn,'&nbsp;',_updateBtn);
+                var tbltr = $('<tr/>') ;
+                tbltr.append( _optd,
+                        $('<td/>',{text:phaseList[i].id }),
+                        $('<td/>',{id: 'name_'+phaseList[i].id, text: phaseList[i].name}),
+                        $('<td/>',{id: 'desc_'+phaseList[i].id, text: phaseList[i].description}) );
+                tbl.append(tbltr);
+            }
+
+            if(flag){
+
+                _div.append(tbl).addClass("list_view_div");
+                var _closeAll = $('<button/>',{id: 'close_all', text: 'Close All', onclick: 'closePhaseList()', class: 'list_btn'});
+                _div.append(_closeAll);
+                $("#phases").append(_div);
+            }
+
+        }
+
+    </script>
+</head>
+<body>
+<div>
+    <form>
+        <label class="comn_label">Phase Name </label>
+        <br/>
+        <input type="text" name="phase_name" onchange="checkPhaseName(this);" class="comn_input"  />
+        <br/>
+        <label class="comn_label">Phase Desc </label>
+        <br/>
+        <textarea rows="5" cols="50" name="phase_description" onchange="checkDescription(this)" class="comn_input" ></textarea>
+        <br/>
+        <button onclick="insertPhase(this)" id="add_phase" class ="comn_btn">Add Phase</button>
+    </form>
+
+    <div id="msg" style="color: red;font-size: 1.1em"></div>
+    <hr color="blue"/>
+
+    <div style="" id="phases">
+        <button id="view_all" class="list_btn" onclick="getPhaselist()">View All</button>
+    </div>
+</div>
+
+
+
+
+</body>
+</html>

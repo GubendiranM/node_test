@@ -1,0 +1,17 @@
+CREATE TABLE timesheet;
+
+CREATE TABLE phase
+(
+  id bigint NOT NULL,
+  name character varying(60),
+  description character varying(255),
+  CONSTRAINT phase_pkey PRIMARY KEY (id)
+);
+
+
+CREATE SEQUENCE phase_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;

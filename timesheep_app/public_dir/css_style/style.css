@@ -1,0 +1,68 @@
+.list_view_div{
+    background-color: #f0f8ff;
+    color: black;
+
+}
+.list_view_tbl{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:16px;
+}
+.list_view_tbl tr:nth-child(odd){background-color: #5f9ea0; }
+.list_view_tbl tr:nth-child(even){background-color: #b0c3d4; }
+
+.list_view_div table{
+    width: 100%;
+    min-width:600px!important;
+}
+.list_option_btn {
+    background-color: #778899;
+    border-radius: 3px;
+    border:1px solid black;
+    color: white;
+    padding: 2px 10px;
+    text-align: center;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+.list_btn {
+    background-color: #006400;
+    border-radius: 5px;
+    border:2px solid black;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.comn_btn {
+    background-color: blue;
+    border-radius: 5px;
+    border:2px solid black;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.comn_input {
+    width:400px;
+    border-radius: 5px;
+    border:2px solid blue;
+    padding: 5px 10px;
+    font-size: 16px;
+    margin: 4px 2px;
+}
+
+.comn_label {
+    padding: 5px 5px;
+    font-size: 20px;
+    color: blue;
+}
+body{
+    background-color: #d3d3d3;
+}
